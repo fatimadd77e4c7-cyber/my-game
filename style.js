@@ -21,17 +21,24 @@ let audioContext = null;
 let aiTimer = null;
 
 const winningLines = [
-  [0, 1, 2], [3, 4, 5], [6, 7, 8],
-  [0, 3, 6], [1, 4, 7], [2, 5, 8],
-  [0, 4, 8], [2, 4, 6]
+  [0, 1, 2],
+  [3, 4, 5],
+  [6, 7, 8],
+  [0, 3, 6],
+  [1, 4, 7],
+  [2, 5, 8],
+  [0, 4, 8],
+  [2, 4, 6]
 ];
 
-// Sound effects generated with JavaScript
+// SOUND EFFECTS
 function playSound(type) {
   if (!soundOn) return;
 
   try {
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    const AudioCtx =
+      window.AudioContext || window.webkitAudioContext;
+
     if (!AudioCtx) return;
 
     if (!audioContext) audioContext = new AudioCtx();
@@ -41,22 +48,32 @@ function playSound(type) {
     }
 
     const sounds = {
-      click:   [{ f: 520, d: 0.07, w: "sine" }],
-      restart: [{ f: 390, d: 0.08, w: "sine" },
-                { f: 560, d: 0.10, w: "sine" }],
-      win:     [{ f: 523, d: 0.14, w: "sine" },
-                { f: 659, d: 0.14, w: "sine" },
-                { f: 784, d: 0.25, w: "sine" }],
-      lose:    [{ f: 392, d: 0.17, w: "triangle" },
-                { f: 330, d: 0.17, w: "triangle" },
-                { f: 262, d: 0.30, w: "triangle" }],
-      draw:    [{ f: 440, d: 0.12, w: "sine" },
-                { f: 440, d: 0.20, w: "sine" }]
+      click: [
+        { f: 520, d: 0.07, w: "sine" }
+      ],
+      restart: [
+        { f: 390, d: 0.08, w: "sine" },
+        { f: 560, d: 0.10, w: "sine" }
+      ],
+      win: [
+        { f: 523, d: 0.14, w: "sine" },
+        { f: 659, d: 0.14, w: "sine" },
+        { f: 784, d: 0.25, w: "sine" }
+      ],
+      lose: [
+        { f: 392, d: 0.17, w: "triangle" },
+        { f: 330, d: 0.17, w: "triangle" },
+        { f: 262, d: 0.30, w: "triangle" }
+      ],
+      draw: [
+        { f: 440, d: 0.12, w: "sine" },
+        { f: 440, d: 0.20, w: "sine" }
+      ]
     };
 
     let start = audioContext.currentTime;
 
-    sounds[type].forEach((note) => {
+    sounds[type].forEach(note => {
       const oscillator = audioContext.createOscillator();
       const gain = audioContext.createGain();
 
@@ -64,7 +81,9 @@ function playSound(type) {
       oscillator.frequency.setValueAtTime(note.f, start);
 
       gain.gain.setValueAtTime(0.0001, start);
-      gain.gain.exponentialRampToValueAtTime(0.12, start + 0.015);
+      gain.gain.exponentialRampToValueAtTime(
+        0.12, start + 0.015
+      );
       gain.gain.exponentialRampToValueAtTime(
         0.0001, start + note.d
       );
@@ -78,10 +97,11 @@ function playSound(type) {
       start += note.d * 0.85;
     });
   } catch (error) {
-    // Game still works if audio is unavailable.
+    // Game will continue even if sound is unavailable.
   }
 }
 
+// SCOREBOARD AND PLAYER TURN
 function updateScores() {
   xScoreText.textContent = scores.X;
   oScoreText.textContent = scores.O;
@@ -102,15 +122,18 @@ function updateNames() {
   }
 }
 
+// CHECK WIN
 function getWinningLine(player) {
   return winningLines.find(line =>
     line.every(index => board[index] === player)
   );
 }
 
+// FINISH GAME
 function finishGame(player) {
   gameOver = true;
   clearTimeout(aiTimer);
+  aiTimer = null;
 
   if (player) {
     const line = getWinningLine(player);
@@ -122,12 +145,14 @@ function finishGame(player) {
     scores[player]++;
     updateScores();
 
-    if (modeSelect.value === "computer" && player === "O") {
-      statusText.textContent = "Oh no! Computer wins 😢";
+    if (
+      modeSelect.value === "computer" &&
+      player === "O"
+    ) {
+      statusText.textContent = "Computer wins! 😢";
       playSound("lose");
     } else {
-      statusText.textContent =
-        player + (player === "X" ? " wins! 🎉" : " wins! 🎉");
+      statusText.textContent = player + " wins! 🎉";
       playSound("win");
     }
   } else {
@@ -142,17 +167,22 @@ function finishGame(player) {
   updateTurn();
 }
 
+// PLAYER CLICK
 function makeMove(index) {
   if (gameOver || board[index] !== "") return;
 
+  // Only allow the human to play as X in computer mode.
   if (
     modeSelect.value === "computer" &&
-    currentPlayer === "O"
-  ) return;
+    currentPlayer !== "X"
+  ) {
+    return;
+  }
 
   placeMove(index, currentPlayer);
 }
 
+// MAKE A MOVE
 function placeMove(index, player) {
   if (gameOver || board[index] !== "") return;
 
@@ -173,23 +203,40 @@ function placeMove(index, player) {
     return;
   }
 
+  // Switch turns
   currentPlayer = player === "X" ? "O" : "X";
   updateTurn();
 
-  if (modeSelect.value === "computer" && currentPlayer === "O") {
+  // COMPUTER TURN
+  if (
+    modeSelect.value === "computer" &&
+    currentPlayer === "O"
+  ) {
     statusText.textContent = "Computer is thinking... 🤔";
 
+    // Lock cells while computer is thinking.
     cells.forEach(cell => {
       cell.disabled = true;
     });
 
-    aiTimer = setTimeout(computerMove, 450);
-  } else {
-    statusText.textContent = currentPlayer + "'s turn to play!";
+    aiTimer = setTimeout(() => {
+      aiTimer = null;
+      computerMove();
+    }, 450);
+
+    return;
   }
+
+  // IMPORTANT: Re-enable all empty cells.
+  // This fixes the issue where X cannot click again.
+  cells.forEach((cell, i) => {
+    cell.disabled = board[i] !== "";
+  });
+
+  statusText.textContent = currentPlayer + "'s turn to play!";
 }
 
-// Computer tries to win, block, or choose a good square.
+// FIND WINNING OR BLOCKING MOVE
 function findBestMove(player) {
   for (let i = 0; i < 9; i++) {
     if (board[i] !== "") continue;
@@ -204,30 +251,48 @@ function findBestMove(player) {
   return -1;
 }
 
+// COMPUTER LOGIC
 function computerMove() {
   if (gameOver || currentPlayer !== "O") return;
 
   let move = findBestMove("O");
 
-  if (move === -1) move = findBestMove("X");
-
-  if (move === -1 && board[4] === "") move = 4;
-
+  // Block the player's winning move.
   if (move === -1) {
-    const corners = [0, 2, 6, 8].filter(i => board[i] === "");
-    const choices = corners.length ? corners :
-      [1, 3, 5, 7].filter(i => board[i] === "");
-
-    move = choices[Math.floor(Math.random() * choices.length)];
+    move = findBestMove("X");
   }
 
-  if (move !== undefined && move !== -1) {
+  // Prefer the center.
+  if (move === -1 && board[4] === "") {
+    move = 4;
+  }
+
+  // Otherwise choose a corner, then a side.
+  if (move === -1) {
+    const corners = [0, 2, 6, 8].filter(
+      i => board[i] === ""
+    );
+
+    const choices = corners.length
+      ? corners
+      : [1, 3, 5, 7].filter(i => board[i] === "");
+
+    if (choices.length > 0) {
+      move = choices[
+        Math.floor(Math.random() * choices.length)
+      ];
+    }
+  }
+
+  if (move !== -1 && move !== undefined) {
     placeMove(move, "O");
   }
 }
 
+// RESTART GAME
 function restartGame(playRestartSound = true) {
   clearTimeout(aiTimer);
+  aiTimer = null;
 
   board = Array(9).fill("");
   currentPlayer = "X";
@@ -241,6 +306,7 @@ function restartGame(playRestartSound = true) {
 
   updateNames();
   updateTurn();
+
   statusText.textContent = "X's turn to play!";
 
   if (playRestartSound) {
@@ -248,6 +314,7 @@ function restartGame(playRestartSound = true) {
   }
 }
 
+// EVENT LISTENERS
 cells.forEach(cell => {
   cell.addEventListener("click", () => {
     makeMove(Number(cell.dataset.index));
@@ -264,6 +331,7 @@ modeSelect.addEventListener("change", () => {
 
 soundBtn.addEventListener("click", () => {
   soundOn = !soundOn;
+
   soundBtn.textContent = soundOn ? "🔊" : "🔇";
   soundBtn.setAttribute(
     "aria-label",
@@ -273,6 +341,6 @@ soundBtn.addEventListener("click", () => {
   if (soundOn) playSound("click");
 });
 
-// Start game
+// START GAME
 updateScores();
 restartGame(false);
