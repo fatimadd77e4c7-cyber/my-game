@@ -1,0 +1,74 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tic Tac Toe | Mini Game</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <main class="game">
+    <header class="header">
+      <div>
+        <p class="tag">YOUR LITTLE GAME ✦</p>
+        <h1>tic tac toe<span>.</span></h1>
+        <p class="subtitle">A little fun, a little competition.</p>
+      </div>
+
+      <button id="soundBtn" class="sound-btn" aria-label="Toggle sound">
+        🔊
+      </button>
+    </header>
+
+    <section class="scoreboard">
+      <div class="score-card active" id="xCard">
+        <span class="player-icon">X</span>
+        <span class="player-name" id="xName">Player 1</span>
+        <strong id="xScore">0</strong>
+      </div>
+
+      <div class="vs">VS</div>
+
+      <div class="score-card" id="oCard">
+        <span class="player-icon o-icon">O</span>
+        <span class="player-name" id="oName">Player 2</span>
+        <strong id="oScore">0</strong>
+      </div>
+    </section>
+
+    <div class="mode-area">
+      <label for="mode">CHOOSE MODE</label>
+      <select id="mode">
+        <option value="computer">Play with Computer 🤖</option>
+        <option value="two">Two Players 👥</option>
+      </select>
+    </div>
+
+    <div class="status" id="status" aria-live="polite">
+      X's turn to play!
+    </div>
+
+    <section class="board" id="board" aria-label="Tic Tac Toe board">
+      <button class="cell" data-index="0" aria-label="Cell 1"></button>
+      <button class="cell" data-index="1" aria-label="Cell 2"></button>
+      <button class="cell" data-index="2" aria-label="Cell 3"></button>
+      <button class="cell" data-index="3" aria-label="Cell 4"></button>
+      <button class="cell" data-index="4" aria-label="Cell 5"></button>
+      <button class="cell" data-index="5" aria-label="Cell 6"></button>
+      <button class="cell" data-index="6" aria-label="Cell 7"></button>
+      <button class="cell" data-index="7" aria-label="Cell 8"></button>
+      <button class="cell" data-index="8" aria-label="Cell 9"></button>
+    </section>
+
+    <button class="restart-btn" id="restartBtn">
+      <span>↻</span> New Game
+    </button>
+
+    <p class="footer">made with <span>♥</span> using HTML, CSS & JS</p>
+  </main>
+
+  <script src="style.js"></script>
+</body>
+</html>
